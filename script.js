@@ -6,6 +6,7 @@ const TADEO = {
     systemActive: localStorage.getItem('tadeo_active') !== 'false',
     ticketPrices: [0.20, 0.30, 0.40, 0.50, 1.00],
     profitPercentage: 0.3, // 30% para el sistema
+    prizePercentage: 0.7, // 70% para premios
     prizeMultiplier: 3, // Triplica el premio
     drawTime: { hours: 18, minutes: 0 } // 6:00 PM
 };
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         allTickets: document.getElementById('allTickets'),
         drawButton: document.getElementById('drawButton'),
         printWinners: document.getElementById('printWinners'),
+        printTickets: document.getElementById('printTickets'),
         toggleSystem: document.getElementById('toggleSystem'),
         collectEarnings: document.getElementById('collectEarnings'),
         adminPanel: document.getElementById('adminPanel'),
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         winner2: document.getElementById('winner2'),
         winner3: document.getElementById('winner3'),
         countdown: document.getElementById('countdown'),
+        currentPool: document.getElementById('currentPool'),
         amountSelect: document.getElementById('amount'),
         nameInput: document.getElementById('name'),
         phoneInput: document.getElementById('phone'),
@@ -47,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     elements.ticketForm.addEventListener('submit', handleTicketPurchase);
     elements.drawButton.addEventListener('click', performDraw);
     elements.printWinners.addEventListener('click', printWinners);
+    elements.printTickets.addEventListener('click', printTickets);
     elements.toggleSystem.addEventListener('click', toggleSystem);
     elements.collectEarnings.addEventListener('click', collectEarnings);
     
@@ -57,10 +61,12 @@ document.addEventListener('DOMContentLoaded', function() {
     updateWinnersDisplay();
     updateCountdown();
     updateEarningsDisplay();
+    updatePrizePool();
     elements.toggleSystem.textContent = TADEO.systemActive ? 'Desactivar Sistema' : 'Activar Sistema';
     
     // Configurar intervalo para el countdown
     setInterval(updateCountdown, 1000);
+    setInterval(updatePrizePool, 5000); // Actualizar pozo cada 5 segundos
     
     // Funciones del sistema
     function updateTicketPrice() {
@@ -124,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTicketList();
         updateAllTicketsList();
         updateEarningsDisplay();
+        updatePrizePool();
         
         // Resetear formulario
         elements.ticketForm.reset();
@@ -138,13 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Calcular pozo de premios (70% de lo vendido)
+        const totalPrizePool = calculatePrizePool();
+        
         // Seleccionar ganadores (mínimo 1, máximo 3)
         const winnerCount = Math.min(3, TADEO.tickets.length);
         const shuffled = [...TADEO.tickets].sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, winnerCount);
-        
-        // Calcular premio total disponible (70% de lo vendido)
-        const totalPrizePool = TADEO.tickets.reduce((sum, t) => sum + t.amount, 0) * (1 - TADEO.profitPercentage);
         
         // Distribuir premios (50% para 1ro, 30% para 2do, 20% para 3ro)
         const prizeDistribution = [0.5, 0.3, 0.2];
@@ -186,8 +193,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTicketList();
         updateAllTicketsList();
         updateWinnersDisplay();
+        updatePrizePool();
         
         alert(`¡Sorteo realizado con éxito! ${winnerCount} ganador(es) seleccionado(s).`);
+    }
+    
+    function calculatePrizePool() {
+        return TADEO.tickets.reduce((sum, t) => sum + t.amount, 0) * TADEO.prizePercentage;
     }
     
     function printWinners() {
@@ -199,21 +211,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const latestWinners = TADEO.winners[0];
         const printContent = `
             <div id="printSection">
-                <h1 style="text-align:center;">Resultados TADEO</h1>
-                <p style="text-align:center;">${new Date(latestWinners.date).toLocaleString()}</p>
-                <h2 style="text-align:center;">Ganadores del Día</h2>
-                ${latestWinners.winners.map(winner => `
-                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-                        <h3 style="color: #e74c3c;">${winner.prizePosition}° Premio: #${winner.number}</h3>
-                        <p><strong>Nombre:</strong> ${winner.name}</p>
-                        <p><strong>Ticket:</strong> $${winner.amount.toFixed(2)}</p>
-                        <p><strong>Premio:</strong> $${winner.winAmount.toFixed(2)}</p>
-                    </div>
-                `).join('')}
-                <div style="margin-top: 30px;">
-                    <p><strong>Total vendido:</strong> $${latestWinners.totalSales.toFixed(2)}</p>
-                    <p><strong>Total premios:</strong> $${latestWinners.totalPrizes.toFixed(2)}</p>
+                <h1 style="text-align:center; color: #2c3e50;">TADEO</h1>
+                <h2 style="text-align:center;">Resultados del Sorteo</h2>
+                <p style="text-align:center; font-size: 1.2rem;">${new Date(latestWinners.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px;">
+                    <h3 style="text-align:center;">Ganadores</h3>
+                    ${latestWinners.winners.map(winner => `
+                        <div style="margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: white;">
+                            <h4 style="color: #e74c3c; margin-bottom: 5px;">${winner.prizePosition}° Premio - Ticket #${winner.number}</h4>
+                            <p><strong>Nombre:</strong> ${winner.name}</p>
+                            <p><strong>Valor ticket:</strong> $${winner.amount.toFixed(2)}</p>
+                            <p><strong>Premio ganado:</strong> $${winner.winAmount.toFixed(2)}</p>
+                        </div>
+                    `).join('')}
                 </div>
+                
+                <div style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                    <h3 style="text-align:center;">Resumen del Sorteo</h3>
+                    <p style="text-align:center;"><strong>Total vendido:</strong> $${latestWinners.totalSales.toFixed(2)}</p>
+                    <p style="text-align:center;"><strong>Total premios:</strong> $${latestWinners.totalPrizes.toFixed(2)}</p>
+                </div>
+                
+                <p style="text-align:center; margin-top: 20px; font-size: 0.9rem; color: #777;">
+                    Sistema TADEO - ${new Date().getFullYear()}
+                </p>
             </div>
         `;
         
@@ -222,6 +244,86 @@ document.addEventListener('DOMContentLoaded', function() {
             <html>
                 <head>
                     <title>Resultados TADEO</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1, h2, h3, h4 { color: #2c3e50; }
+                        @media print {
+                            body { padding: 0; }
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                    <div style="text-align:center; margin-top: 20px;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Imprimir Resultados
+                        </button>
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+    
+    function printTickets() {
+        const todayTickets = TADEO.tickets.filter(t => 
+            new Date(t.date).toDateString() === new Date().toDateString()
+        );
+        
+        if (todayTickets.length === 0) {
+            alert('No hay tickets vendidos hoy para imprimir.');
+            return;
+        }
+        
+        const totalSales = todayTickets.reduce((sum, t) => sum + t.amount, 0);
+        const prizePool = calculatePrizePool();
+        
+        const printContent = `
+            <div id="printSection">
+                <h1 style="text-align:center; color: #2c3e50;">TADEO</h1>
+                <h2 style="text-align:center;">Tickets Vendidos Hoy</h2>
+                <p style="text-align:center; font-size: 1.2rem;">${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                
+                <div style="margin: 20px 0;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #2c3e50; color: white;">
+                                <th style="padding: 10px; text-align: left;">Número</th>
+                                <th style="padding: 10px; text-align: left;">Nombre</th>
+                                <th style="padding: 10px; text-align: right;">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${todayTickets.map(ticket => `
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 8px;">#${ticket.number}</td>
+                                    <td style="padding: 8px;">${ticket.name}</td>
+                                    <td style="padding: 8px; text-align: right;">$${ticket.amount.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px;">
+                    <h3 style="text-align:center;">Resumen</h3>
+                    <p style="text-align:center;"><strong>Total tickets vendidos:</strong> ${todayTickets.length}</p>
+                    <p style="text-align:center;"><strong>Total vendido:</strong> $${totalSales.toFixed(2)}</p>
+                    <p style="text-align:center;"><strong>Pozo acumulado para premios:</strong> $${prizePool.toFixed(2)}</p>
+                </div>
+                
+                <p style="text-align:center; margin-top: 20px; font-size: 0.9rem; color: #777;">
+                    Próximo sorteo hoy a las 6:00 PM - Sistema TADEO
+                </p>
+            </div>
+        `;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Tickets Vendidos - TADEO</title>
                     <style>
                         body { font-family: Arial, sans-serif; padding: 20px; }
                         h1, h2, h3 { color: #2c3e50; }
@@ -233,9 +335,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </head>
                 <body>
                     ${printContent}
-                    <button onclick="window.print()" style="display: block; margin: 20px auto; padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Imprimir Resultados
-                    </button>
+                    <div style="text-align:center; margin-top: 20px;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Imprimir Lista
+                        </button>
+                    </div>
                 </body>
             </html>
         `);
@@ -308,6 +412,10 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.winner1.textContent = latestWinners[0] ? `#${latestWinners[0].number} - ${latestWinners[0].name}` : '---';
             elements.winner2.textContent = latestWinners[1] ? `#${latestWinners[1].number} - ${latestWinners[1].name}` : '---';
             elements.winner3.textContent = latestWinners[2] ? `#${latestWinners[2].number} - ${latestWinners[2].name}` : '---';
+        } else {
+            elements.winner1.textContent = '---';
+            elements.winner2.textContent = '---';
+            elements.winner3.textContent = '---';
         }
     }
     
@@ -336,6 +444,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateEarningsDisplay() {
         elements.earningsDisplay.textContent = TADEO.earnings.toFixed(2);
+    }
+    
+    function updatePrizePool() {
+        const todayTickets = TADEO.tickets.filter(t => 
+            new Date(t.date).toDateString() === new Date().toDateString()
+        );
+        
+        const prizePool = todayTickets.reduce((sum, t) => sum + t.amount, 0) * TADEO.prizePercentage;
+        elements.currentPool.textContent = prizePool.toFixed(2);
     }
     
     // Función auxiliar para guardar datos
