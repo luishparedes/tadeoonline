@@ -66,6 +66,20 @@ header h1 {
     padding-bottom: 10px;
 }
 
+.prize-pool {
+    background-color: var(--light);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.prize-pool h3 {
+    color: var(--secondary);
+    font-size: 1.5rem;
+}
+
 .ticket-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
