@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TADEO - Lotería Diaria</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .panel {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        
+        .ticket-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: #1a252f;
+        }
+        
+        .winners {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .winner-card {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .winner-card h3 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .winner-card p {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .ticket-list {
+            margin-top: 20px;
+        }
+        
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ticket-item:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .ticket-number {
+            font-weight: bold;
+        }
+        
+        .ticket-amount {
+            color: var(--success);
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .admin-panel {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #777;
+        }
+        
+        @media (max-width: 768px) {
+            .ticket-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .winners {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="logo">TADEO</span> - Lotería Diaria</h1>
+            <p class="subtitle">Sorteos diarios a las 6:00 PM - ¡Triplica tu vuelto!</p>
+        </header>
+        
+        <div class="panel">
+            <h2 class="panel-title">Próximo Sorteo</h2>
+            <div class="countdown" id="countdown">00:00:00</div>
+            
+            <div class="winners" id="lastWinners">
+                <div class="winner-card">
+                    <h3>1er Premio</h3>
+                    <p id="winner1">---</p>
+                </div>
+                <div class="winner-card">
+                    <h3>2do Premio</h3>
+                    <p id="winner2">---</p>
+                </div>
+                <div class="winner-card">
+                    <h3>3er Premio</h3>
+                    <p id="winner3">---</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2 class="panel-title">Comprar Ticket</h2>
+            <form id="ticketForm" class="ticket-form">
+                <div class="form-group">
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Monto del Ticket</label>
+                    <select id="amount" required>
+                        <option value="0.20">$0.20</option>
+                        <option value="0.30">$0.30</option>
+                        <option value="0.40">$0.40</option>
+                        <option value="0.50">$0.50</option>
+                        <option value="1.00">$1.00</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="number">Número (000-999)</label>
+                    <input type="number" id="number" min="0" max="999" required>
+                </div>
+                <button type="submit" class="btn-primary">Comprar Ticket ($<span id="ticketPrice">0.20</span>)</button>
+            </form>
+        </div>
+        
+        <div class="panel">
+            <h2 class="panel-title">Tickets Vendidos Hoy</h2>
+            <div class="ticket-list" id="ticketList">
+                <p>No hay tickets vendidos todavía</p>
+            </div>
+        </div>
+        
+        <div class="admin-panel hidden" id="adminPanel">
+            <h2 class="panel-title">Panel de Administración</h2>
+            <div class="admin-controls">
+                <button id="drawButton">Realizar Sorteo Ahora</button>
+                <button id="toggleSystem">Desactivar Sistema</button>
+                <button id="collectEarnings">Recolectar Ganancias ($<span id="earnings">0.00</span>)</button>
+            </div>
+            <div class="ticket-list" id="allTickets">
+                <p>No hay tickets en el sistema</p>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>Sistema TADEO &copy; <span id="year"></span> - Todos los derechos reservados</p>
+            <p>Este sistema está protegido por derechos de autor. Cualquier uso no autorizado está prohibido.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración inicial
+            const currentYear = new Date().getFullYear();
+            document.getElementById('year').textContent = currentYear;
+            
+            // Variables del sistema
+            let tickets = JSON.parse(localStorage.getItem('tadeo_tickets')) || [];
+            let winners = JSON.parse(localStorage.getItem('tadeo_winners')) || [];
+            let earnings = parseFloat(localStorage.getItem('tadeo_earnings')) || 0;
+            let systemActive = localStorage.getItem('tadeo_active') !== 'false';
+            
+            // Elementos del DOM
+            const ticketForm = document.getElementById('ticketForm');
+            const ticketList = document.getElementById('ticketList');
+            const allTickets = document.getElementById('allTickets');
+            const drawButton = document.getElementById('drawButton');
+            const toggleSystem = document.getElementById('toggleSystem');
+            const collectEarnings = document.getElementById('collectEarnings');
+            const adminPanel = document.getElementById('adminPanel');
+            const ticketPrice = document.getElementById('ticketPrice');
+            const earningsDisplay = document.getElementById('earnings');
+            const winner1 = document.getElementById('winner1');
+            const winner2 = document.getElementById('winner2');
+            const winner3 = document.getElementById('winner3');
+            const countdown = document.getElementById('countdown');
+            const amountSelect = document.getElementById('amount');
+            
+            // Mostrar panel admin si la URL tiene parámetro admin
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('admin')) {
+                adminPanel.classList.remove('hidden');
+            }
+            
+            // Actualizar precio del ticket al cambiar selección
+            amountSelect.addEventListener('change', function() {
+                ticketPrice.textContent = this.value;
+            });
+            
+            // Cargar datos iniciales
+            updateTicketList();
+            updateAllTicketsList();
+            updateWinnersDisplay();
+            updateCountdown();
+            earningsDisplay.textContent = earnings.toFixed(2);
+            toggleSystem.textContent = systemActive ? 'Desactivar Sistema' : 'Activar Sistema';
+            
+            // Configurar intervalo para el countdown
+            setInterval(updateCountdown, 1000);
+            
+            // Manejar compra de tickets
+            ticketForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!systemActive) {
+                    alert('El sistema está desactivado temporalmente.');
+                    return;
+                }
+                
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const number = document.getElementById('number').value.padStart(3, '0');
+                
+                if (number < 0 || number > 999) {
+                    alert('Por favor ingrese un número entre 000 y 999');
+                    return;
+                }
+                
+                const ticket = {
+                    id: Date.now(),
+                    name,
+                    phone,
+                    amount,
+                    number,
+                    date: new Date().toISOString(),
+                    winner: false
+                };
+                
+                tickets.push(ticket);
+                saveTickets();
+                updateTicketList();
+                updateAllTicketsList();
+                
+                // Calcular ganancias (30% para el sistema, 70% para premios)
+                earnings += amount * 0.3;
+                earningsDisplay.textContent = earnings.toFixed(2);
+                localStorage.setItem('tadeo_earnings', earnings.toString());
+                
+                // Resetear formulario
+                ticketForm.reset();
+                ticketPrice.textContent = '0.20';
+                
+                alert(`Ticket #${number} comprado exitosamente por $${amount.toFixed(2)}. ¡Buena suerte!`);
+            });
+            
+            // Manejar sorteo
+            drawButton.addEventListener('click', function() {
+                if (tickets.length < 3) {
+                    alert('Se necesitan al menos 3 tickets para realizar un sorteo.');
+                    return;
+                }
+                
+                // Seleccionar 3 ganadores aleatorios
+                const shuffled = [...tickets].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, 3);
+                
+                // Marcar como ganadores
+                selected.forEach((winner, index) => {
+                    winner.winner = true;
+                    winner.prize = index + 1;
+                    winner.winAmount = winner.amount * 3; // Triplicar el monto
+                });
+                
+                // Guardar ganadores
+                winners.unshift({
+                    date: new Date().toISOString(),
+                    winners: selected.map(w => ({
+                        number: w.number,
+                        name: w.name,
+                        amount: w.amount,
+                        winAmount: w.winAmount
+                    }))
+                });
+                
+                // Limpiar tickets del día
+                tickets = [];
+                
+                // Guardar cambios
+                saveTickets();
+                localStorage.setItem('tadeo_winners', JSON.stringify(winners));
+                
+                // Actualizar UI
+                updateTicketList();
+                updateAllTicketsList();
+                updateWinnersDisplay();
+                
+                alert('¡Sorteo realizado con éxito! Los ganadores han sido notificados.');
+            });
+            
+            // Manejar activar/desactivar sistema
+            toggleSystem.addEventListener('click', function() {
+                systemActive = !systemActive;
+                localStorage.setItem('tadeo_active', systemActive.toString());
+                this.textContent = systemActive ? 'Desactivar Sistema' : 'Activar Sistema';
+                
+                alert(`Sistema ${systemActive ? 'activado' : 'desactivado'} con éxito.`);
+            });
+            
+            // Manejar recolección de ganancias
+            collectEarnings.addEventListener('click', function() {
+                if (earnings <= 0) {
+                    alert('No hay ganancias para recolectar.');
+                    return;
+                }
+                
+                alert(`Ganancias de $${earnings.toFixed(2)} recolectadas con éxito.`);
+                earnings = 0;
+                earningsDisplay.textContent = '0.00';
+                localStorage.setItem('tadeo_earnings', '0');
+            });
+            
+            // Funciones auxiliares
+            function saveTickets() {
+                localStorage.setItem('tadeo_tickets', JSON.stringify(tickets));
+            }
+            
+            function updateTicketList() {
+                if (tickets.length === 0) {
+                    ticketList.innerHTML = '<p>No hay tickets vendidos todavía</p>';
+                    return;
+                }
+                
+                ticketList.innerHTML = tickets.map(ticket => `
+                    <div class="ticket-item">
+                        <span class="ticket-number">#${ticket.number}</span>
+                        <span>${ticket.name}</span>
+                        <span class="ticket-amount">$${ticket.amount.toFixed(2)}</span>
+                    </div>
+                `).join('');
+            }
+            
+            function updateAllTicketsList() {
+                const allTicketsData = [...tickets, ...winners.flatMap(w => w.winners)];
+                
+                if (allTicketsData.length === 0) {
+                    allTickets.innerHTML = '<p>No hay tickets en el sistema</p>';
+                    return;
+                }
+                
+                allTickets.innerHTML = allTicketsData.map(ticket => `
+                    <div class="ticket-item">
+                        <span class="ticket-number">#${ticket.number}</span>
+                        <span>${ticket.name}</span>
+                        <span>$${ticket.amount.toFixed(2)}</span>
+                        <span>${ticket.winner ? `Ganador $${ticket.winAmount.toFixed(2)}` : ''}</span>
+                    </div>
+                `).join('');
+            }
+            
+            function updateWinnersDisplay() {
+                if (winners.length > 0) {
+                    const latestWinners = winners[0].winners;
+                    winner1.textContent = `#${latestWinners[0].number} - ${latestWinners[0].name}`;
+                    winner2.textContent = `#${latestWinners[1].number} - ${latestWinners[1].name}`;
+                    winner3.textContent = `#${latestWinners[2].number} - ${latestWinners[2].name}`;
+                }
+            }
+            
+            function updateCountdown() {
+                const now = new Date();
+                let drawTime = new Date();
+                
+                // Configurar para las 6:00 PM
+                drawTime.setHours(18, 0, 0, 0);
+                
+                // Si ya pasó la hora de hoy, configurar para mañana
+                if (now > drawTime) {
+                    drawTime.setDate(drawTime.getDate() + 1);
+                }
+                
+                const diff = drawTime - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Realizar sorteo automático si es hora (solo en producción real)
+                if (hours === 0 && minutes === 0 && seconds === 0) {
+                    if (tickets.length >= 3 && systemActive) {
+                        drawButton.click();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
