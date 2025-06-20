@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TADEO - Lotería Diaria</title>
+    <title>TADEO</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><span class="logo">TADEO</span> - Lotería Diaria</h1>
+            <h1><span class="logo">TADEO</span></h1>
             <p class="subtitle">Sorteos diarios a las 6:00 PM - ¡Triplica tu vuelto!</p>
         </header>
         
         <div class="panel">
             <h2 class="panel-title">Próximo Sorteo</h2>
             <div class="countdown" id="countdown">00:00:00</div>
+            
+            <div class="prize-pool">
+                <h3>Pozo Acumulado: $<span id="currentPool">0.00</span></h3>
+            </div>
             
             <div class="winners" id="lastWinners">
                 <div class="winner-card">
@@ -74,6 +78,7 @@
             <div class="admin-controls">
                 <button id="drawButton">Realizar Sorteo Ahora</button>
                 <button id="printWinners">Imprimir Ganadores</button>
+                <button id="printTickets">Imprimir Tickets Vendidos</button>
                 <button id="toggleSystem">Desactivar Sistema</button>
                 <button id="collectEarnings">Recolectar Ganancias ($<span id="earnings">0.00</span>)</button>
             </div>
@@ -84,7 +89,6 @@
         
         <div class="copyright">
             <p>Sistema TADEO &copy; <span id="year"></span> - Todos los derechos reservados</p>
-            <p>Este sistema está protegido por derechos de autor. Cualquier uso no autorizado está prohibido.</p>
         </div>
     </div>
 
