@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TADEO - Sistema de Premios</title>
+    <title>TADEO</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -12,26 +12,26 @@
             --dark: #2c3e50;
             --success: #2ecc71;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
-        
+
         body {
             background-color: #f5f5f5;
             color: var(--dark);
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
             background-color: var(--primary);
             color: white;
@@ -41,22 +41,22 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
         }
-        
+
         .logo {
             font-weight: bold;
             color: var(--secondary);
         }
-        
+
         .subtitle {
             font-size: 1.2rem;
             opacity: 0.9;
         }
-        
+
         .panel {
             background-color: white;
             border-radius: 8px;
@@ -64,7 +64,7 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .panel-title {
             font-size: 1.5rem;
             margin-bottom: 15px;
@@ -72,7 +72,7 @@
             border-bottom: 2px solid var(--secondary);
             padding-bottom: 10px;
         }
-        
+
         .prize-pool {
             background-color: var(--light);
             padding: 15px;
@@ -81,28 +81,28 @@
             margin: 15px 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .prize-pool h3 {
             color: var(--secondary);
             font-size: 1.5rem;
         }
-        
+
         .ticket-form {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-        
+
         .form-group {
             margin-bottom: 15px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-        
+
         input, select {
             width: 100%;
             padding: 10px;
@@ -110,7 +110,7 @@
             border-radius: 4px;
             font-size: 1rem;
         }
-        
+
         button {
             background-color: var(--secondary);
             color: white;
@@ -122,26 +122,26 @@
             font-weight: bold;
             transition: background-color 0.3s;
         }
-        
+
         button:hover {
             background-color: #c0392b;
         }
-        
+
         .btn-primary {
             background-color: var(--primary);
         }
-        
+
         .btn-primary:hover {
             background-color: #1a252f;
         }
-        
+
         .winners {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-top: 20px;
         }
-        
+
         .winner-card {
             background-color: var(--light);
             padding: 15px;
@@ -149,40 +149,40 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .winner-card h3 {
             color: var(--secondary);
             margin-bottom: 10px;
         }
-        
+
         .winner-card p {
             font-size: 1.2rem;
             font-weight: bold;
         }
-        
+
         .ticket-list {
             margin-top: 20px;
         }
-        
+
         .ticket-item {
             display: flex;
             justify-content: space-between;
             padding: 10px;
             border-bottom: 1px solid #eee;
         }
-        
+
         .ticket-item:nth-child(even) {
             background-color: #f9f9f9;
         }
-        
+
         .ticket-number {
             font-weight: bold;
         }
-        
+
         .ticket-amount {
             color: var(--success);
         }
-        
+
         .countdown {
             font-size: 1.5rem;
             text-align: center;
@@ -190,7 +190,7 @@
             font-weight: bold;
             color: var(--secondary);
         }
-        
+
         .admin-panel {
             background-color: #f8f9fa;
             border: 1px solid #ddd;
@@ -198,17 +198,17 @@
             padding: 20px;
             margin-top: 30px;
         }
-        
+
         .admin-controls {
             display: flex;
             justify-content: space-between;
             margin-top: 15px;
         }
-        
+
         .hidden {
             display: none;
         }
-        
+
         .copyright {
             text-align: center;
             margin-top: 30px;
@@ -216,7 +216,22 @@
             border-top: 1px solid #ddd;
             color: #777;
         }
-        
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printSection, #printSection * {
+                visibility: visible;
+            }
+            #printSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+
         @media (max-width: 768px) {
             .ticket-form {
                 grid-template-columns: 1fr;
@@ -327,13 +342,15 @@
             earnings: parseFloat(localStorage.getItem('tadeo_earnings')) || 0,
             systemActive: localStorage.getItem('tadeo_active') !== 'false',
             ticketPrices: [0.20, 0.30, 0.40, 0.50, 1.00],
-            profitPercentage: 0.3,
-            prizePercentage: 0.7,
-            drawTime: { hours: 18, minutes: 0 }
+            profitPercentage: 0.3, // 30% para el sistema
+            prizePercentage: 0.7, // 70% para premios
+            prizeMultiplier: 3, // Triplica el premio
+            drawTime: { hours: 18, minutes: 0 } // 6:00 PM
         };
 
+        // Inicialización del sistema
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicialización
+            // Configuración inicial
             document.getElementById('year').textContent = new Date().getFullYear();
             
             // Elementos del DOM
@@ -359,12 +376,12 @@
                 phoneInput: document.getElementById('phone'),
                 numberInput: document.getElementById('number')
             };
-
+            
             // Mostrar panel admin si la URL tiene parámetro admin
             if (new URLSearchParams(window.location.search).has('admin')) {
                 elements.adminPanel.classList.remove('hidden');
             }
-
+            
             // Event listeners
             elements.amountSelect.addEventListener('change', updateTicketPrice);
             elements.ticketForm.addEventListener('submit', handleTicketPurchase);
@@ -373,7 +390,7 @@
             elements.printTickets.addEventListener('click', printTickets);
             elements.toggleSystem.addEventListener('click', toggleSystem);
             elements.collectEarnings.addEventListener('click', collectEarnings);
-
+            
             // Inicializar UI
             updateTicketPrice();
             updateTicketList();
@@ -383,15 +400,16 @@
             updateEarningsDisplay();
             updatePrizePool();
             elements.toggleSystem.textContent = TADEO.systemActive ? 'Desactivar Sistema' : 'Activar Sistema';
-
+            
             // Configurar intervalo para el countdown
             setInterval(updateCountdown, 1000);
-            setInterval(updatePrizePool, 5000);
-
+            setInterval(updatePrizePool, 5000); // Actualizar pozo cada 5 segundos
+            
+            // Funciones del sistema
             function updateTicketPrice() {
                 elements.ticketPrice.textContent = elements.amountSelect.value;
             }
-
+            
             function handleTicketPurchase(e) {
                 e.preventDefault();
                 
@@ -405,6 +423,7 @@
                 const amount = parseFloat(elements.amountSelect.value);
                 const number = elements.numberInput.value.padStart(3, '0');
                 
+                // Validaciones
                 if (!name || !phone) {
                     alert('Por favor complete todos los campos.');
                     return;
@@ -415,6 +434,7 @@
                     return;
                 }
                 
+                // Verificar si el número ya fue comprado hoy
                 const isDuplicate = TADEO.tickets.some(t => 
                     t.number === number && 
                     new Date(t.date).toDateString() === new Date().toDateString()
@@ -425,6 +445,7 @@
                     return;
                 }
                 
+                // Crear ticket
                 const ticket = {
                     id: Date.now(),
                     name,
@@ -438,30 +459,38 @@
                 TADEO.tickets.push(ticket);
                 saveData('tadeo_tickets', TADEO.tickets);
                 
+                // Calcular ganancias
                 TADEO.earnings += amount * TADEO.profitPercentage;
                 saveData('tadeo_earnings', TADEO.earnings);
                 
+                // Actualizar UI
                 updateTicketList();
                 updateAllTicketsList();
                 updateEarningsDisplay();
                 updatePrizePool();
                 
+                // Resetear formulario
                 elements.ticketForm.reset();
                 elements.ticketPrice.textContent = '0.20';
                 
                 alert(`Ticket #${number} comprado exitosamente por $${amount.toFixed(2)}. ¡Buena suerte!`);
             }
-
+            
             function performDraw() {
                 if (TADEO.tickets.length < 1) {
                     alert('Se necesitan tickets vendidos para realizar un sorteo.');
                     return;
                 }
                 
+                // Calcular pozo de premios (70% de lo vendido)
                 const totalPrizePool = calculatePrizePool();
+                
+                // Seleccionar ganadores (mínimo 1, máximo 3)
                 const winnerCount = Math.min(3, TADEO.tickets.length);
                 const shuffled = [...TADEO.tickets].sort(() => 0.5 - Math.random());
                 const selected = shuffled.slice(0, winnerCount);
+                
+                // Distribuir premios (50% para 1ro, 30% para 2do, 20% para 3ro)
                 const prizeDistribution = [0.5, 0.3, 0.2];
                 const prizes = [];
                 
@@ -469,12 +498,14 @@
                     prizes.push(totalPrizePool * prizeDistribution[i]);
                 }
                 
+                // Marcar ganadores y asignar premios
                 selected.forEach((winner, index) => {
                     winner.winner = true;
                     winner.prize = index + 1;
                     winner.winAmount = prizes[index];
                 });
                 
+                // Guardar ganadores
                 TADEO.winners.unshift({
                     date: new Date().toISOString(),
                     winners: selected.map((w, i) => ({
@@ -488,10 +519,14 @@
                     totalPrizes: totalPrizePool
                 });
                 
+                // Limpiar tickets del día
                 TADEO.tickets = [];
+                
+                // Guardar cambios
                 saveData('tadeo_tickets', TADEO.tickets);
                 saveData('tadeo_winners', TADEO.winners);
                 
+                // Actualizar UI
                 updateTicketList();
                 updateAllTicketsList();
                 updateWinnersDisplay();
@@ -499,11 +534,11 @@
                 
                 alert(`¡Sorteo realizado con éxito! ${winnerCount} ganador(es) seleccionado(s).`);
             }
-
+            
             function calculatePrizePool() {
                 return TADEO.tickets.reduce((sum, t) => sum + t.amount, 0) * TADEO.prizePercentage;
             }
-
+            
             function printWinners() {
                 if (TADEO.winners.length === 0) {
                     alert('No hay ganadores para imprimir.');
@@ -534,6 +569,10 @@
                             <p style="text-align:center;"><strong>Total vendido:</strong> $${latestWinners.totalSales.toFixed(2)}</p>
                             <p style="text-align:center;"><strong>Total premios:</strong> $${latestWinners.totalPrizes.toFixed(2)}</p>
                         </div>
+                        
+                        <p style="text-align:center; margin-top: 20px; font-size: 0.9rem; color: #777;">
+                            Sistema TADEO - ${new Date().getFullYear()}
+                        </p>
                     </div>
                 `;
                 
@@ -545,22 +584,25 @@
                             <style>
                                 body { font-family: Arial, sans-serif; padding: 20px; }
                                 h1, h2, h3, h4 { color: #2c3e50; }
+                                @media print {
+                                    body { padding: 0; }
+                                    button { display: none; }
+                                }
                             </style>
                         </head>
                         <body>
                             ${printContent}
-                            <script>
-                                window.onload = function() {
-                                    window.print();
-                                    setTimeout(function() { window.close(); }, 500);
-                                };
-                            </script>
+                            <div style="text-align:center; margin-top: 20px;">
+                                <button onclick="window.print()" style="padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Imprimir Resultados
+                                </button>
+                            </div>
                         </body>
                     </html>
                 `);
                 printWindow.document.close();
             }
-
+            
             function printTickets() {
                 const todayTickets = TADEO.tickets.filter(t => 
                     new Date(t.date).toDateString() === new Date().toDateString()
@@ -607,6 +649,10 @@
                             <p style="text-align:center;"><strong>Total vendido:</strong> $${totalSales.toFixed(2)}</p>
                             <p style="text-align:center;"><strong>Pozo acumulado para premios:</strong> $${prizePool.toFixed(2)}</p>
                         </div>
+                        
+                        <p style="text-align:center; margin-top: 20px; font-size: 0.9rem; color: #777;">
+                            Próximo sorteo hoy a las 6:00 PM - Sistema TADEO
+                        </p>
                     </div>
                 `;
                 
@@ -618,29 +664,32 @@
                             <style>
                                 body { font-family: Arial, sans-serif; padding: 20px; }
                                 h1, h2, h3 { color: #2c3e50; }
+                                @media print {
+                                    body { padding: 0; }
+                                    button { display: none; }
+                                }
                             </style>
                         </head>
                         <body>
                             ${printContent}
-                            <script>
-                                window.onload = function() {
-                                    window.print();
-                                    setTimeout(function() { window.close(); }, 500);
-                                };
-                            </script>
+                            <div style="text-align:center; margin-top: 20px;">
+                                <button onclick="window.print()" style="padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Imprimir Lista
+                                </button>
+                            </div>
                         </body>
                     </html>
                 `);
                 printWindow.document.close();
             }
-
+            
             function toggleSystem() {
                 TADEO.systemActive = !TADEO.systemActive;
                 saveData('tadeo_active', TADEO.systemActive);
                 elements.toggleSystem.textContent = TADEO.systemActive ? 'Desactivar Sistema' : 'Activar Sistema';
                 alert(`Sistema ${TADEO.systemActive ? 'activado' : 'desactivado'} con éxito.`);
             }
-
+            
             function collectEarnings() {
                 if (TADEO.earnings <= 0) {
                     alert('No hay ganancias para recolectar.');
@@ -652,7 +701,8 @@
                 saveData('tadeo_earnings', TADEO.earnings);
                 updateEarningsDisplay();
             }
-
+            
+            // Funciones de actualización de UI
             function updateTicketList() {
                 const todayTickets = TADEO.tickets.filter(t => 
                     new Date(t.date).toDateString() === new Date().toDateString()
@@ -671,7 +721,7 @@
                     </div>
                 `).join('');
             }
-
+            
             function updateAllTicketsList() {
                 const allTicketsData = [
                     ...TADEO.tickets, 
@@ -692,7 +742,7 @@
                     </div>
                 `).join('');
             }
-
+            
             function updateWinnersDisplay() {
                 if (TADEO.winners.length > 0) {
                     const latestWinners = TADEO.winners[0].winners;
@@ -705,7 +755,7 @@
                     elements.winner3.textContent = '---';
                 }
             }
-
+            
             function updateCountdown() {
                 const now = new Date();
                 let drawTime = new Date();
@@ -723,23 +773,26 @@
                 
                 elements.countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 
+                // Realizar sorteo automático si es hora
                 if (hours === 0 && minutes === 0 && seconds === 0 && TADEO.systemActive) {
                     performDraw();
                 }
             }
-
+            
             function updateEarningsDisplay() {
                 elements.earningsDisplay.textContent = TADEO.earnings.toFixed(2);
             }
-
+            
             function updatePrizePool() {
                 const todayTickets = TADEO.tickets.filter(t => 
                     new Date(t.date).toDateString() === new Date().toDateString()
                 );
+                
                 const prizePool = todayTickets.reduce((sum, t) => sum + t.amount, 0) * TADEO.prizePercentage;
                 elements.currentPool.textContent = prizePool.toFixed(2);
             }
-
+            
+            // Función auxiliar para guardar datos
             function saveData(key, value) {
                 localStorage.setItem(key, typeof value === 'object' ? JSON.stringify(value) : value);
             }
